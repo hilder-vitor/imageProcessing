@@ -1,2 +1,2 @@
-# imageProcessing
-Several scripts that I have written in a Digital Image Processing Course.
+# Digital Image Processing 
+Several scripts for process digital images.
