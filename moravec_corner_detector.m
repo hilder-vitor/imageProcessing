@@ -100,7 +100,7 @@ function mostraCantos(img, cantos)
 		end
 	end
 	% gravando a imagem com os cantos destacados
-	print('cantos_destacados_harris.png');
+	print('cantos_destacados_moravec.png');
 endfunction
 
 
@@ -113,6 +113,6 @@ endfunction
 arquivo = input('Digite o caminho da imagem: ', 's');
 img = imread(arquivo);  % lê a imagem
 
-corners = moravec(img, 10);
+corners = moravec(img, 175);
 
 mostraCantos(img, corners);
