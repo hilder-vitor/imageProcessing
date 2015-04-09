@@ -9,28 +9,26 @@ global C = (L * K) * (L * K); % definindo a constante usada para evitar instabil
 
 function mu = media(img)
 	% qnt de linhas e de colunas da imagem
-	N = size(img)(1);
-	M = size(img)(2);
+	[N M] = size(img);
 	
-	soma = sum(img(:)); % soma todos os valores da imagem
+	soma = sum(sum(img)); % soma todos os valores da imagem
 	mu = soma / (N*M); % divide pela quantidade de pixeis
 
 endfunction
 
+
+
 function dp = desvio_padrao(img)
 	% qnt de linhas e de colunas da imagem
-	N = size(img)(1);
-	M = size(img)(2);
+	[N M] = size(img);
 
 	mi = media(img);
 	soma = 0.0;
 
-	for i=1:N
-		for j=1:M
-			soma = soma + (img(i, j) - mi) * (img(i, j) - mi);
-		end
-	end
-
+	img = img - mi;
+	img = img .* img;
+	soma = sum(sum(img))
+	
 	variancia = soma / (N*M - 1);
 	dp = sqrt(variancia);
 
@@ -38,26 +36,16 @@ endfunction
 
 
 function corr = correlacao(img1, img2)
-	% qnt de linhas e de colunas da imagem 1
-	N1 = size(img1)(1);
-	M1 = size(img1)(2);
-
-	% qnt de linhas e de colunas da imagem 2
-	N2 = size(img2)(1);
-	M2 = size(img2)(2);
-
-	N = min(N1, N2);
-	M = min(M1, M2);
+	% qnt de linhas e de colunas das images
+	[N M] = size(img1);
 
 	mi1 = media(img1);
 	mi2 = media(img2);
 	soma = 0.0;	
 
-	for i=1:N
-		for j=1:M
-			soma = soma + (img1(i, j) - mi1) * (img2(i, j) - mi2);		
-		end
-	end
+	img1 = img1 - mi1;
+	img2 = img2 - mi2;
+	soma = sum(sum(img1 .* img2));
 
 	corr = soma / (N*M - 1);
 
@@ -105,21 +93,17 @@ endfunction
 nome1 = input('Digite o nome da primeira imagem: ', 's');
 nome2 = input('Digite o nome da segunda imagem: ', 's');
 
-img1 = int32(imread(nome1));
-img2 = int32(imread(nome2));
+img1 = imread(nome1);
+img2 = imread(nome2);
 
-l = luminancia_comp(img1, img2);
-disp('O índice de comparação das luminâncias é');
-disp(l);
+[N1 M1] = size(img1);
+[N2 M2] = size(img2);
+N = min(N1, N2);
+M = min(M1, M2);
 
-c = contraste_comp(img1, img2);
-disp('O índice de comparação dos constrastes é');
-disp(c);
-
-e = estrutura_comp(img1, img2);
-disp('O índice de comparação das estruturas das imagens é');
-disp(e);
+img1 = int32(imresize (img1, [N M]));
+img2 = int32(imresize (img2, [N M]));
 
 s = ssim(img1, img2);
-disp('SSIM das duas imagens é');
+disp('SSIM');
 disp(s);
