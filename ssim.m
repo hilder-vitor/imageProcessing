@@ -27,7 +27,7 @@ function dp = desvio_padrao(img)
 
 	img = img - mi;
 	img = img .* img;
-	soma = sum(sum(img))
+	soma = sum(sum(img));
 	
 	variancia = soma / (N*M - 1);
 	dp = sqrt(variancia);
@@ -80,13 +80,57 @@ function ec = estrutura_comp (img1, img2)
 endfunction
 
 function indice = ssim(img1, img2)
-	alpha = 1;
-	beta = 1;
-	gamma = 1;
+	alpha = 1.0;
+	beta = 1.0;
+	gamma = 1.0;
 	l = luminancia_comp(img1, img2);
 	c = contraste_comp(img1, img2);
 	e = estrutura_comp(img1, img2);
 	indice = (l**alpha) * (c**beta) * (e**gamma);
+	
+endfunction
+
+function new_map = map_into_interval_0_255 (A)
+
+   % y = 7.26648*10^6 * x^11 - 2.05466 * 10^7 * x^10 
+	%  + 7.26512*10^6 * x^9 + 2.91364*10^7 * x^8 - 2.91585* 10^7 * x^7  - 4.89464 * 10^6 * x^6  + 1.67244 * 10^7 * x^5  - 4.83483 * 10^6 * x^4 - 1.96304 * 10^6 * x^3 + 1.13975 * 10^6 * x^2 - 134307 * x  + 30;
+	
+ %	 y = int8(y)
+	[N M] = size(A);
+	new_map = zeros(N, M);
+	for i=1:N
+		for j=1:M
+			x = A(i, j);
+			if x < 0
+				y = 0;
+			elseif x < 0.7
+				y = 35 * x;
+			elseif x < 0.75
+				y = 45 * x;
+			elseif x < 0.85
+				y = 60 * x;
+			elseif x < 0.95
+				y = 75 * x;
+			elseif x < 0.98
+				y = 100 * x;
+			elseif x < 0.99
+				y = 120 * x + rem(x*1000, 10);
+			elseif x < 0.999
+				y = 150 * x + rem(x*10000, 10);
+			elseif x < 0.9999
+				y = 185 * x + rem(x*10000, 10);
+			else
+				y = 255 * x;
+			end
+			new_map(i, j) = y;
+		end
+	end
+
+	new_map = int8(new_map);
+
+%	m = 127.5;
+%	y = rem(int32(m * x +  m), 256);
+
 endfunction
 
 function ssim_map = ssim_map(img1, img2, window_size)
@@ -97,27 +141,36 @@ function ssim_map = ssim_map(img1, img2, window_size)
 	window_img1 = zeros(window_size);
 	window_img2 = zeros(window_size);
 
-	ssim_map = zeros(N, M);
+	ssim_map = zeros(N/window_size, M/window_size);
+	k = l = 0;
 
 
-	for i=1+window_size/2:window_size:N-window_size/2
-		for j=1+window_size/2:window_size:M-window_size/2
+	for i=int32(1+window_size/2):window_size:int32(N-window_size/2)
+		k++;
+		l = 0;
+		for j=int32(1+window_size/2):window_size:int32(M-window_size/2)
+			l++;
 			% copy only a window centered in (i, j)
-			window_img1(1:window_size,1:window_size) = img1(i-window_size/2:i+window_size/2,j-window_size/2:j+window_size/2);
-			window_img2(1:window_size,1:window_size) = img2(i-window_size/2:i+window_size/2,j-window_size/2:j+window_size/2);
+			window_img1(1:window_size,1:window_size) = img1(int32(i-window_size/2):int32(i+window_size/2-1),int32(j-window_size/2):int32(j+window_size/2-1));
+			window_img2(1:window_size,1:window_size) = img2(int32(i-window_size/2):int32(i+window_size/2-1),int32(j-window_size/2):int32(j+window_size/2-1));
 			% apply the gaussian window to these subfigures
 			window_img1 = window_img1 .* window;
 			window_img2 = window_img2 .* window;
-			ssim_map(i, j) = ssim(window_img1, window_img2);
+			ssim_map(k, l) = ssim(window_img1, window_img2); % -1 <= index <= 1
 		end
 	end
-
 
 endfunction
 
 
 nome1 = input('Digite o nome da primeira imagem: ', 's');
 nome2 = input('Digite o nome da segunda imagem: ', 's');
+%nome1 = 'monalisa.jpg';
+%nome1 = 'teste_mapa_SSIM/borboleta.jpg';
+%nome1 = 'teste_mapa_SSIM/lobo.png';
+%nome2 = 'teste_mapa_SSIM/lobo_borrado_cantos.png';
+%nome2 = 'monalisa_inclinada.jpg';
+%nome2 = 'teste_mapa_SSIM/borboleta_borrada_meio.jpg';
 
 img1 = imread(nome1);
 img2 = imread(nome2);
@@ -130,7 +183,17 @@ M = min(M1, M2);
 img1 = int32(imresize (img1, [N M]));
 img2 = int32(imresize (img2, [N M]));
 
-map = ssim_map(img1, img2, 11);
-%disp('SSIM');
-%disp(s);
+s = ssim(img1, img2);
+ssim_map = ssim_map(img1, img2, 11);
+map = map_into_interval_0_255(ssim_map); % map to integers in [0, 255] 
 imshow(map);
+hold on;
+print('ssim_map.png');
+
+disp('SSIM');
+disp(s);
+
+disp('MSSIM');
+[Nmap Mmap] = size(ssim_map);
+ms = sum(sum(ssim_map)) / (Nmap * Mmap);
+disp(ms);
