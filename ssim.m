@@ -89,6 +89,32 @@ function indice = ssim(img1, img2)
 	indice = (l**alpha) * (c**beta) * (e**gamma);
 endfunction
 
+function ssim_map = ssim_map(img1, img2, window_size)
+
+	% create a gaussian window
+	window = fspecial('gaussian', window_size, 1.5);
+	[N M] = size(img1);
+	window_img1 = zeros(window_size);
+	window_img2 = zeros(window_size);
+
+	ssim_map = zeros(N, M);
+
+
+	for i=1+window_size/2:window_size:N-window_size/2
+		for j=1+window_size/2:window_size:M-window_size/2
+			% copy only a window centered in (i, j)
+			window_img1(1:window_size,1:window_size) = img1(i-window_size/2:i+window_size/2,j-window_size/2:j+window_size/2);
+			window_img2(1:window_size,1:window_size) = img2(i-window_size/2:i+window_size/2,j-window_size/2:j+window_size/2);
+			% apply the gaussian window to these subfigures
+			window_img1 = window_img1 .* window;
+			window_img2 = window_img2 .* window;
+			ssim_map(i, j) = ssim(window_img1, window_img2);
+		end
+	end
+
+
+endfunction
+
 
 nome1 = input('Digite o nome da primeira imagem: ', 's');
 nome2 = input('Digite o nome da segunda imagem: ', 's');
@@ -104,6 +130,7 @@ M = min(M1, M2);
 img1 = int32(imresize (img1, [N M]));
 img2 = int32(imresize (img2, [N M]));
 
-s = ssim(img1, img2);
-disp('SSIM');
-disp(s);
+map = ssim_map(img1, img2, 11);
+%disp('SSIM');
+%disp(s);
+imshow(map);
