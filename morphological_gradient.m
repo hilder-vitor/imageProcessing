@@ -125,11 +125,17 @@ function ers = erosion(img, b)
 	end
 endfunction
 
+function grad = gradient(img, b)
+	dlt = dilation(img, b);
+	ers = erosion(img, b);
 
-A = [0 0 3 0 0 0;
-     0 1 2 3 0 0;
-	 0 4 5 1 3 0;
-	 0 9 1 0 0 0;
+	grad = dlt - ers;
+endfunction
+
+A = [0 0 1 0 0 0;
+     0 5 2 1 0 0;
+	 0 3 3 1 2 0;
+	 0 5 1 0 0 0;
 	 0 0 0 0 0 0]
 
 b = [-1 0;
@@ -142,6 +148,7 @@ dlt = dilation(A, b)
 
 ers = erosion(A, b)
 
+grad = gradient(A, b)
 
 %file = input('Type the path of the image: ', 's');
 %img = imread(file);  % read the image
