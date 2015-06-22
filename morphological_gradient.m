@@ -13,17 +13,17 @@
 function print_flat_structuring_element(b)
 	N = size(b)(1)
 	if 0 == N
-		printf("{ }\n")
+		printf('{ }\n')
 	else
-		printf "{"
+		printf '{'
 		for k = 1:size(b)(1)-1
 			x = b(k, 1);
 			y = b(k, 2);
-			printf("(%d , %d), ", x, y) 
+			printf('(%d , %d), ', x, y) 
 		end
 		x = b(N, 1);
 		y = b(N, 2);
-		printf("(%d , %d)}\n", x, y) 
+		printf('(%d , %d)}\n', x, y) 
 	end
 endfunction
 
