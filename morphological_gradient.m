@@ -73,6 +73,7 @@ function dlt = dilation(img, b)
 			dlt(i, j) = intersection;
 		end
 	end
+	dlt = uint8(dlt);
 endfunction
 
 
@@ -123,39 +124,89 @@ function ers = erosion(img, b)
 			ers(i, j) = min_val;
 		end
 	end
+	ers = uint8(ers);
 endfunction
 
 function grad = gradient(img, b)
 	dlt = dilation(img, b);
 	ers = erosion(img, b);
 
-	grad = dlt - ers;
+	grad = uint8(dlt - ers);
 endfunction
 
-A = [0 0 1 0 0 0;
-     0 5 2 1 0 0;
-	 0 3 3 1 2 0;
-	 0 5 1 0 0 0;
-	 0 0 0 0 0 0]
-
-b = [-1 0;
+cruz_3_3 = [-2 0;
+	-1 0;
+	 0 -1;
+	 0 -2;
 	 0 0;
-	 1 0];
+	 0 1;
+	 0 2;
+	 1 0;
+	 2 0];
+
+cruz_5_5 = [
+	-4 0;
+	-3 0;
+	-2 0;
+	-1 0;
+	 0 -1;
+	 0 -2;
+	 0 -3;
+	 0 -4;
+	 0 0;
+	 0 1;
+	 0 2;
+	 0 3;
+	 0 4;
+	 1 0;
+	 2 0;
+	 3 0;
+	 4 0];
+
+cruz_7_7 = [
+	-6 0;
+	-5 0;
+	-4 0;
+	-3 0;
+	-2 0;
+	-1 0;
+	 0 -1;
+	 0 -2;
+	 0 -3;
+	 0 -4;
+	 0 -5;
+	 0 -6;
+	 0 0;
+	 0 1;
+	 0 2;
+	 0 3;
+	 0 4;
+	 0 5;
+	 0 6;
+	 1 0;
+	 2 0
+	 3 0;
+	 4 0;
+	 5 0;
+	 6 0];
+
+b = cruz_7_7;
+
+A = imread('montagne.png');
+A = rgb2gray(A);
+
+imwrite (A, "gray.png", "png");
 
 print_flat_structuring_element(b)
 
-dlt = dilation(A, b)
+dlt = dilation(A, b);
+imwrite (dlt, "dilation.png", "png");
 
-ers = erosion(A, b)
+ers = erosion(A, b);
+imwrite (ers, "erosion.png", "png");
 
-grad = gradient(A, b)
+grad = gradient(A, b);
 
-%file = input('Type the path of the image: ', 's');
-%img = imread(file);  % read the image
-
-%limit = input('Type the limit value for the thresholding (among 0 and 255): ');
-
-%img_binary = thresholding(img, limit);
+imwrite (grad, "grad.png", "png");
 
 
-%imwrite (img_binary, "binary_image.png", "png"); % save the binary image
