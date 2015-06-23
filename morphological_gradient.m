@@ -134,6 +134,23 @@ function grad = gradient(img, b)
 	grad = uint8(dlt - ers);
 endfunction
 
+%	Receive
+%			img    -> grayscale image
+%			(i, j) -> upper-left coner of the cell
+%			sigma  -> width and height of the cell (so, cell is a square)
+%	Return 
+%			a pair (l, c) such that img(l, c) is the minimum among all the values of img
+function [l c]  = minimum_value_inside_cell (img, i, j, sigma)
+	cell = img(i:(i+sigma-1), j:(j+sigma-1))
+	[min_per_collumn line_indexes] = min(cell);
+	[min_val col_index] = min(min_per_collumn);
+	lin_index = line_indexes(col_index);
+	l = lin_index + i - 1;
+	c = col_index + j - 1;
+endfunction
+
+
+
 cruz_3_3 = [-2 0;
 	-1 0;
 	 0 -1;
